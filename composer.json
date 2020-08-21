@@ -8,9 +8,7 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {
-        "topthink/framework": "^6.0"
-    },
+    "require": {},
     "autoload": {
         "psr-4": {
             "huangweijie\\file\\": "src/file"
