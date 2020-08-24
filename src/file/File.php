@@ -1,10 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: hwj
- * Date: 2020/4/27 0027
- * Time: 16:03
- */
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: huangweijie <1539369355@qq.com>
+// +----------------------------------------------------------------------
+
 namespace huangweijie\file;
 
 class File
@@ -20,7 +20,7 @@ class File
      * 当前路径 file || folder
      * @var string
      */
-    private $path;
+    private $path = '';
 
     /**
      * 当前动作
@@ -31,7 +31,17 @@ class File
     /**
      * @var string
      */
-    private $viewPath;
+    private $templatePath;
+
+    /**
+     * @var array
+     */
+    private $headers = [];
+
+    /**
+     * @var string
+     */
+    private $output;
 
     public function __construct()
     {
@@ -40,7 +50,9 @@ class File
 
     private function init()
     {
-        $this->viewPath = basename(__FILE__) . DIRECTORY_SEPARATOR . 'manage' . DIRECTORY_SEPARATOR . 'view.html';
+        $this->templatePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template' . DIRECTORY_SEPARATOR;
+        $this->path = empty($_GET['p'])? '': urldecode($_GET['p']);
+        $this->action = empty($_GET['template'])? 'ls': 'cat';
     }
 
     public function setRootPath($rootPath)
@@ -64,20 +76,20 @@ class File
         return $this;
     }
 
-    protected function catalogList($path)
+    protected function catalog($path)
     {
-        $objects = is_readable($path) ? scandir($path) : array();
-        $folders = array();
-        $files = array();
+        $objects = is_readable($path) ? scandir($path) : [];
+        $folders = [];
+        $files = [];
         if (is_array($objects)) {
             foreach ($objects as $file) {
                 if ($file == '.' || $file == '..') {
                     continue;
                 }
-                $new_path = $path . '/' . $file;
-                if (is_file($new_path)) {
+                $newPath = $path . DIRECTORY_SEPARATOR . $file;
+                if (is_file($newPath)) {
                     $files[] = $file;
-                } elseif (is_dir($new_path) && $file != '.' && $file != '..') {
+                } elseif (is_dir($newPath) && $file != '.' && $file != '..') {
                     $folders[] = $file;
                 }
             }
@@ -90,7 +102,115 @@ class File
             natcasesort($folders);
         }
 
-        return array('files' => $files, 'folders' => $folders);
+        return ['files' => $files, 'folders' => $folders];
+    }
+
+    protected function catalogInfo($path)
+    {
+        $catalogInfo = [];
+        foreach ($this->catalog($path) as $type => $catalog) {
+            if (!in_array($type, ['files', 'folders'])) {
+                continue;
+            }
+
+            foreach ($catalog as $typeItem) {
+                $catalogInfo[] = [
+                    'name' => $typeItem,
+                    'parent' => '',
+                    'type' => $type,
+                    'size' => $type == 'folders'? 'Folder': $this->filesize(filesize($path . DIRECTORY_SEPARATOR . $typeItem)),
+                    'modifiedTime' => date('Y-m-d H:i:s', filemtime($path . DIRECTORY_SEPARATOR . $typeItem))
+                ];
+            }
+        }
+
+        return $catalogInfo;
+    }
+
+    protected function filesize($size)
+    {
+        if ($size < 1000) {
+            return sprintf('%s B', $size);
+        } elseif (($size / 1024) < 1000) {
+            return sprintf('%s K', round(($size / 1024), 2));
+        } elseif (($size / 1024 / 1024) < 1000) {
+            return sprintf('%s M', round(($size / 1024 / 1024), 2));
+        } elseif (($size / 1024 / 1024 / 1024) < 1000) {
+            return sprintf('%s G', round(($size / 1024 / 1024 / 1024), 2));
+        } else {
+            return sprintf('%s T', round(($size / 1024 / 1024 / 1024 / 1024), 2));
+        }
+    }
+
+    protected function view($template, $data = [])
+    {
+        $file = $this->templatePath . $template;
+
+        if (file_exists($file)) {
+            extract($data);
+
+            ob_start();
+
+            require($file);
+
+            $output = ob_get_contents();
+
+            ob_end_clean();
+        } else {
+            throw new LogicException('Error: Could not load template ' . $file . '!');
+        }
+
+        return $output;
+    }
+
+    protected function output() {
+        if ($this->output) {
+            if (!headers_sent()) {
+                foreach ($this->headers as $header) {
+                    header($header, true);
+                }
+            }
+
+            echo $this->output;
+        }
+    }
+
+    protected function show($data = [])
+    {
+        $this->output = $this->view('show.html', $data);
+        $this->output();
+    }
+
+    protected function cat($path, $data=[])
+    {
+        $catData = [];
+        $catData['catalogInfo'] = $this->catalogInfo($path);
+        $catData['path'] = empty($this->path)? '': urlencode($this->path);
+
+        $data = array_merge([
+            'header'  => '',
+            'content' => '',
+            'footer'  => '',
+        ], $data);
+
+        $data['content'] =  $this->view('cat.html', $catData);
+        $this->show($data);
+    }
+
+    protected function ls($path, $data=[])
+    {
+        $lsData = [];
+        $lsData['catalogInfo'] = $this->catalogInfo($path);
+        $lsData['path'] = empty($this->path)? '': urlencode($this->path);
+
+        $data = array_merge([
+            'header'  => '',
+            'content' => '',
+            'footer'  => '',
+        ], $data);
+
+        $data['content'] =  $this->view('ls.html', $lsData);
+        $this->show($data);
     }
 
     public function handle()
@@ -100,16 +220,14 @@ class File
         }
 
         $path = $this->rootPath;
-        if (isset($this->path)) {
-            $path .= $this->path;
+        if (!empty($this->path)) {
+            $path .= DIRECTORY_SEPARATOR . $this->path;
         }
 
-        $catalogList = $this->catalogList($path);
-        require_once $this->viewPath;
+        $data = [];
+        $data['header']  =  $this->view('header.html');
+        $data['footer']  =  $this->view('footer.html');
+        $this->{$this->action}($path, $data);
     }
 
-    public function getContents()
-    {
-
-    }
 }

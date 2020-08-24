@@ -8,7 +8,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "php": ">=5.4.45"
+    },
     "autoload": {
         "psr-4": {
             "huangweijie\\file\\": "src/file"
