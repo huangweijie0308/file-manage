@@ -60,7 +60,7 @@ class File
         $this->action = 'ls';
         if (!empty($_GET['file'])) {
             $this->file = trim($_GET['file']);
-            $this->action = 'cat';
+            $this->action = empty($_GET['a'])? 'cat': trim($_GET['a']);
         }
     }
 
@@ -189,6 +189,29 @@ class File
     {
         $this->output = $this->view('show.html', $data);
         $this->output();
+    }
+
+    protected function down()
+    {
+        $file = $this->rootPath . DIRECTORY_SEPARATOR . $this->path . DIRECTORY_SEPARATOR . $this->file;
+
+        if (!is_file($file)) {
+            header('HTTP/1.1 404 NOT FOUND');
+        }
+
+        $fileHandle = fopen ($file, "rb");
+
+        Header ( "Content-type: application/octet-stream" );
+
+        Header ( "Accept-Ranges: bytes" );
+
+        Header ( "Accept-Length: " . filesize ( $file ) );
+
+        Header ( "Content-Disposition: attachment; filename=" . $this->file );
+
+        $stream = fopen('php://output', 'w');
+
+        @fwrite($stream, fread ($fileHandle, filesize($file)));
     }
 
     protected function cat($path, $data = [])

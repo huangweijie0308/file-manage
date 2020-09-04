@@ -9,6 +9,7 @@
     <?php foreach($catalogInfo as $info) {
         $view = $info['type'] == 'files'? "?p={$path}&file={$info['name']}": '?p=' . urlencode(trim($path . '/' . $info['name'], '/'));
         $del = '';
+        $down = $view . '&a=down';
     ?>
     <tr>
         <td>
@@ -22,7 +23,8 @@
         <td><?php echo $info['modifiedTime']?></td>
         <td>
             <?php if ($info['type'] == 'files') {?>
-            <a href="<?php echo $del;?>"><span class="glyphicon glyphicon-trash" aria-hidden="true" style="color:#ff272d;"></span></a>
+            <!-- <a href="<?php echo $del;?>"><span class="glyphicon glyphicon-trash" aria-hidden="true" style="color:#ff272d;"></span></a>-->
+            <a href="<?php echo $down;?>"><span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color:#2E5CD5;"></span></a>
             <?php }?>
         </td>
     </tr>
