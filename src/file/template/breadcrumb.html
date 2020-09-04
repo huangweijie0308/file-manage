@@ -1,0 +1,11 @@
+<?php $breadcrumb = explode('/', urldecode($path));?>
+<ol class="breadcrumb">
+    <a href="?p="><span class="glyphicon glyphicon-home" aria-hidden="true"></span></a>
+    <?php foreach ($breadcrumb as $item) {
+            if (empty($item)) {continue;}
+            $position = isset($position)? urlencode($position . '/' . $item): $item;
+    ?>
+    <?php if (!strpos($item, ".")) {?>
+    <li><a href="?p=<?php echo $position;?>"><?php echo $item?></a></li>
+    <?php } else echo "<li>{$item}</li>";}?>
+</ol>

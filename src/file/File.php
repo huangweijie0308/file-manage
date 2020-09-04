@@ -43,6 +43,11 @@ class File
      */
     private $output;
 
+    /**
+     * @var string
+     */
+    private $file;
+
     public function __construct()
     {
         $this->init();
@@ -52,7 +57,11 @@ class File
     {
         $this->templatePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template' . DIRECTORY_SEPARATOR;
         $this->path = empty($_GET['p'])? '': urldecode($_GET['p']);
-        $this->action = empty($_GET['template'])? 'ls': 'cat';
+        $this->action = 'ls';
+        if (!empty($_GET['file'])) {
+            $this->file = trim($_GET['file']);
+            $this->action = 'cat';
+        }
     }
 
     public function setRootPath($rootPath)
@@ -163,7 +172,8 @@ class File
         return $output;
     }
 
-    protected function output() {
+    protected function output()
+    {
         if ($this->output) {
             if (!headers_sent()) {
                 foreach ($this->headers as $header) {
@@ -181,11 +191,16 @@ class File
         $this->output();
     }
 
-    protected function cat($path, $data=[])
+    protected function cat($path, $data = [])
     {
+        $file = $this->rootPath . DIRECTORY_SEPARATOR . $this->path . DIRECTORY_SEPARATOR . $this->file;
+        if (!is_file($file)) {
+            return;
+        }
+
         $catData = [];
-        $catData['catalogInfo'] = $this->catalogInfo($path);
-        $catData['path'] = empty($this->path)? '': urlencode($this->path);
+        $catData['content'] = str_replace("\r\n","<br/>", file_get_contents($file));
+        $catData['breadcrumb'] = $this->view('breadcrumb.html', ['path' => empty($this->path)? '': urlencode($this->path . '/' . $this->file)]);
 
         $data = array_merge([
             'header'  => '',
@@ -197,11 +212,12 @@ class File
         $this->show($data);
     }
 
-    protected function ls($path, $data=[])
+    protected function ls($path, $data = [])
     {
         $lsData = [];
         $lsData['catalogInfo'] = $this->catalogInfo($path);
         $lsData['path'] = empty($this->path)? '': urlencode($this->path);
+        $lsData['breadcrumb'] = $this->view('breadcrumb.html', ['path' => $lsData['path']]);
 
         $data = array_merge([
             'header'  => '',
