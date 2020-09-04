@@ -200,7 +200,7 @@ class File
 
         $catData = [];
         $catData['content'] = str_replace("\r\n","<br/>", file_get_contents($file));
-        $catData['breadcrumb'] = $this->view('breadcrumb.html', ['path' => empty($this->path)? '': urlencode($this->path . '/' . $this->file)]);
+        $catData['breadcrumb'] = $this->view('breadcrumb.html', ['path' => empty($this->path)? $this->file: urlencode($this->path . '/' . $this->file)]);
 
         $data = array_merge([
             'header'  => '',
