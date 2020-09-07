@@ -251,7 +251,7 @@ class File
     public function handle()
     {
         if (!isset($this->rootPath)) {
-            throw new LogicException("The root directory is not set.");
+            throw new \LogicException("The root directory is not set.");
         }
 
         $path = $this->rootPath;
@@ -262,6 +262,11 @@ class File
         $data = [];
         $data['header']  =  $this->view('header.html');
         $data['footer']  =  $this->view('footer.html');
+
+        if (!is_callable([$this, $this->action])) {
+            throw new \InvalidArgumentException("invalid operation : " . $this->action);
+        }
+
         $this->{$this->action}($path, $data);
     }
 
