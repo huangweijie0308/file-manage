@@ -201,16 +201,12 @@ class File
 
         $fileHandle = fopen ($file, "rb");
 
-        Header ( "Content-type: application/octet-stream" );
-
-        Header ( "Accept-Ranges: bytes" );
-
-        Header ( "Accept-Length: " . filesize ( $file ) );
-
-        Header ( "Content-Disposition: attachment; filename=" . $this->file );
+        Header("Content-type: application/octet-stream");
+        Header("Accept-Ranges: bytes");
+        Header("Accept-Length: " . filesize ( $file ));
+        Header("Content-Disposition: attachment; filename=" . $this->file);
 
         $stream = fopen('php://output', 'w');
-
         @fwrite($stream, fread ($fileHandle, filesize($file)));
     }
 
