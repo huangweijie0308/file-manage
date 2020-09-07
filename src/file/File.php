@@ -203,7 +203,7 @@ class File
 
         Header("Content-type: application/octet-stream");
         Header("Accept-Ranges: bytes");
-        Header("Accept-Length: " . filesize ( $file ));
+        Header("Accept-Length: " . filesize($file));
         Header("Content-Disposition: attachment; filename=" . $this->file);
 
         $stream = fopen('php://output', 'w');
