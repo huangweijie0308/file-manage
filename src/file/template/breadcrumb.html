@@ -5,7 +5,7 @@
             if (empty($item)) {continue;}
             $position = isset($position)? urlencode($position . '/' . $item): $item;
     ?>
-    <?php if (!strpos($item, ".")) {?>
+    <?php if (strpos($item, ".") === false) {?>
     <li><a href="?p=<?php echo $position;?>"><?php echo $item?></a></li>
     <?php } else echo "<li>{$item}</li>";}?>
 </ol>
