@@ -6,7 +6,8 @@
 composer require huangweijie/file-manage
 ```
 ###### 用法
-```php
+
+```
 <?php
  use huangweijie\file\File;
  
