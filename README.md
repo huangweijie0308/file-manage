@@ -5,4 +5,14 @@
 ```shell
 composer require huangweijie/file-manage
 ```
+###### 用法
+```php
+<?php
+ use huangweijie\file\File;
+ 
+ $filemanager = new File();
+ $filemanager->setRootPath($filePath)->handle();
+ ```
+
+
 
