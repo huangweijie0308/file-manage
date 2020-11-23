@@ -116,22 +116,43 @@ class File
 
     protected function catalogInfo($path)
     {
-        $catalogInfo = [];
+        $catalogInfo = [
+            'list' => [],
+            'statistics' => '',
+        ];
+
+        $number = 1;
+        $totalFileSize = 0;
+        $totalFileNunber = $totalFolderNunber = 0;
         foreach ($this->catalog($path) as $type => $catalog) {
             if (!in_array($type, ['files', 'folders'])) {
                 continue;
             }
 
             foreach ($catalog as $typeItem) {
-                $catalogInfo[] = [
+                $currentPath = $path . DIRECTORY_SEPARATOR . $typeItem;
+                $fileSize = 'Folder';
+                if ($type != 'folders') {
+                    $totalFileSize += $fileSize = filesize($currentPath);
+                    $totalFileNunber++;
+                } else {
+                    $totalFolderNunber++;
+                }
+
+                $catalogInfo['list'][] = [
+                    'number' => $number,
                     'name' => $typeItem,
                     'parent' => '',
                     'type' => $type,
-                    'size' => $type == 'folders'? 'Folder': $this->filesize(filesize($path . DIRECTORY_SEPARATOR . $typeItem)),
+                    'size' => $type == 'folders'? 'Folder': $this->filesize($fileSize),
                     'modifiedTime' => date('Y-m-d H:i:s', filemtime($path . DIRECTORY_SEPARATOR . $typeItem))
                 ];
+
+                $number++;
             }
         }
+
+        $catalogInfo['statistics'] = '总文件数：' . $totalFileNunber . '&nbsp&nbsp总文件大小：' . $this->filesize($totalFileSize) . '&nbsp&nbsp总文件夹数：' . $totalFolderNunber;
 
         return $catalogInfo;
     }

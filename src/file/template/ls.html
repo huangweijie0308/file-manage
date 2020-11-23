@@ -2,16 +2,20 @@
 <table class="table table-hover table-bordered">
     <?php echo $breadcrumb;?>
     <tbody>
-    <tr class="active"><th>文件</th><th>大小</th><th>修改时间</th><th>操作</th></tr>
+    <tr class="active"><th>序号</th><th>文件</th><th>大小</th><th>修改时间</th><th>操作</th></tr>
     <?php if (!empty($path)) {?>
-    <tr><td colspan="4"><a href="?p=<?php echo urlencode(substr(urldecode($path), 0, strrpos(urldecode($path), '/')));?>"><span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span></a></td></tr>
-    <?php } if (!empty($catalogInfo) && is_array($catalogInfo)) {?>
-    <?php foreach($catalogInfo as $info) {
+    <tr><td colspan="5"><a href="?p=<?php echo urlencode(substr(urldecode($path), 0, strrpos(urldecode($path), '/')));?>"><svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-arrow-90deg-left" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z"/>
+    </svg></a></td></tr>
+    <tr><td colspan="5"><?php print_r($catalogInfo['statistics']);?></td></tr>
+    <?php } if (!empty($catalogInfo['list']) && is_array($catalogInfo['list'])) {?>
+    <?php foreach($catalogInfo['list'] as $info) {
         $view = $info['type'] == 'files'? "?p={$path}&file={$info['name']}": '?p=' . urlencode(trim($path . '/' . $info['name'], '/'));
         $del = '';
         $down = $view . '&a=down';
     ?>
     <tr>
+        <td><?php echo $info['number']?></td>
         <td>
             <?php if ($info['type'] == 'files') {?>
             <a href="<?php echo $view;?>"><span class="glyphicon glyphicon-file" aria-hidden="true" style="color:#222222;"><?php echo $info['name']?></span></a>
@@ -23,7 +27,6 @@
         <td><?php echo $info['modifiedTime']?></td>
         <td>
             <?php if ($info['type'] == 'files') {?>
-            <!-- <a href="<?php echo $del;?>"><span class="glyphicon glyphicon-trash" aria-hidden="true" style="color:#ff272d;"></span></a>-->
             <a href="<?php echo $down;?>"><span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color:#2E5CD5;"></span></a>
             <?php }?>
         </td>
