@@ -1,5 +1,6 @@
 <div class="table-responsive">
 <table class="table table-hover table-bordered">
+    <script>function delFile(event) {if(confirm("确定删除该文件?")){event.returnValue=true;return true;}event.returnValue=false;return false;}</script>
     <?php echo $breadcrumb;?>
     <tbody>
     <tr class="active"><th>序号</th><th>文件</th><th>大小</th><th>修改时间</th><th>操作</th></tr>
@@ -11,7 +12,7 @@
     <?php } if (!empty($catalogInfo['list']) && is_array($catalogInfo['list'])) {?>
     <?php foreach($catalogInfo['list'] as $info) {
         $view = $info['type'] == 'files'? "?p={$path}&file={$info['name']}": '?p=' . urlencode(trim($path . '/' . $info['name'], '/'));
-        $del = '';
+        $del = $view . '&a=del';
         $down = $view . '&a=down';
     ?>
     <tr>
@@ -27,12 +28,17 @@
         <td><?php echo $info['modifiedTime']?></td>
         <td>
             <?php if ($info['type'] == 'files') {?>
+            <?php if (in_array('down', $authority)) {?>
             <a href="<?php echo $down;?>"><span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color:#2E5CD5;"></span></a>
+            <?php }?>
+            <?php if (in_array('del', $authority)) {?>
+            <a onclick="delFile(event);" href="<?php echo $del;?>"><span class="glyphicon glyphicon-trash" aria-hidden="true" style="color:#ff272d;"></span></a>
+            <?php }?>
             <?php }?>
         </td>
     </tr>
     <?php }} else {?>
-    <tr><td colspan="4">Folder is empty</td></tr>
+    <tr><td colspan="5">Folder is empty</td></tr>
     <?php }?>
     </tbody>
 </table>

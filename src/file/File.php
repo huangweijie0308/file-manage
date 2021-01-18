@@ -48,8 +48,14 @@ class File
      */
     private $file;
 
-    public function __construct()
+    /**
+     * @var array
+     */
+    private $allowFileOperation = ['down'];
+
+    public function __construct($allowFileOperation = [])
     {
+        empty($allowFileOperation) || $this->allowFileOperation = $allowFileOperation;
         $this->init();
     }
 
@@ -212,6 +218,13 @@ class File
         $this->output();
     }
 
+    protected function del($path, $data = [])
+    {
+        $file = $this->rootPath . DIRECTORY_SEPARATOR . $this->path . DIRECTORY_SEPARATOR . $this->file;
+        @unlink($file);
+        return $this->ls($path, $data);
+    }
+
     protected function down()
     {
         $file = $this->rootPath . DIRECTORY_SEPARATOR . $this->path . DIRECTORY_SEPARATOR . $this->file;
@@ -258,6 +271,7 @@ class File
         $lsData['catalogInfo'] = $this->catalogInfo($path);
         $lsData['path'] = empty($this->path)? '': urlencode($this->path);
         $lsData['breadcrumb'] = $this->view('breadcrumb.html', ['path' => $lsData['path']]);
+        $lsData['authority'] = $this->allowFileOperation;
 
         $data = array_merge([
             'header'  => '',
