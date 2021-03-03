@@ -14,6 +14,8 @@ composer require huangweijie/file-manage
  $filemanager = new File();
  $filemanager->setRootPath($filePath)->handle();
  ```
+ ###### 效果
+ ![preview](https://raw.githubusercontent.com/huangweijie0308/file-manage/master/preview.png)
 
 
 
